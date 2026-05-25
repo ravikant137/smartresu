@@ -8,16 +8,25 @@
   </head>
   <body>
     <div class="container">
-      <header>
-        <h1>Smart Resume ATS Assistant</h1>
-        <p>Upload your resume, compare against job descriptions, and generate ATS match results.</p>
+      <header class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">ATS Automation</span>
+          <h1>Smart Resume ATS Assistant</h1>
+          <p>Upload your resume, compare roles in real time, generate tailored matches, and apply with confidence.</p>
+          <div class="pill-row">
+            <span class="pill">AI-powered matching</span>
+            <span class="pill">Resume tailoring</span>
+            <span class="pill">Job search workflow</span>
+          </div>
+        </div>
+        <div class="hero-visual"></div>
       </header>
 
       {% if message %}
       <div class="alert">{{ message }}</div>
       {% endif %}
 
-      <section class="card">
+      <section class="card card-glow">
         <h2>1. Upload Resume</h2>
         <form action="/upload" method="post" enctype="multipart/form-data">
           <input type="file" name="resume_file" accept=".txt,.pdf,.docx" required />
@@ -33,7 +42,7 @@
       </section>
       {% endif %}
 
-      <section class="card">
+      <section class="card card-glow">
         <h2>2. Evaluate Job Description</h2>
         <form action="/evaluate" method="post">
           <input type="hidden" name="resume_text" value="{{ resume_text | e }}" />
@@ -73,7 +82,7 @@
       </section>
       {% endif %}
 
-      <section class="card">
+      <section class="card card-glow">
         <h2>3. Search LinkedIn Jobs</h2>
         <form action="/search" method="post">
           <input type="hidden" name="resume_text" value="{{ resume_text | e }}" />
