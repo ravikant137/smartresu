@@ -52,17 +52,10 @@ ENV VARIABLES (.env)
 
 import os
 import re
-import time
 import json
-import requests
-import pandas as pd
 
 from dotenv import load_dotenv
-from bs4 import BeautifulSoup
 from openai import OpenAI
-
-from playwright.sync_api import sync_playwright
-from apscheduler.schedulers.blocking import BlockingScheduler
 
 # ============================================================
 # LOAD ENV
