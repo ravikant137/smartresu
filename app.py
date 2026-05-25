@@ -276,15 +276,23 @@ async def apply_job(
     if ats_score < 70:
         matching_resume = generate_matching_resume(job_text, resume_text, profile)
 
-    result = auto_easy_apply(job_link)
-    message = (
-        result
-        or f"Apply placeholder executed for {title} at {company}. ATS score: {ats_score}."
-    )
+    result = auto_easy_apply(job_link, title, company)
+    message = f"{result} ATS score: {ats_score}."
+
+    job = {
+        "title": title,
+        "company": company,
+        "location": location,
+        "link": job_link,
+        "description": description,
+        "ats_score": ats_score,
+        "needs_match": ats_score < 70,
+    }
 
     evaluation = {
         "ats_score": ats_score,
         "matching_resume": matching_resume,
+        "auto_apply_note": result,
     }
 
     return render_template(
@@ -292,10 +300,10 @@ async def apply_job(
         {
             "resume_text": resume_text,
             "profile": profile,
-            "jobs": [],
+            "jobs": [job],
             "evaluation": evaluation,
             "message": message,
             "keyword": "",
-            "job_description": "",
+            "job_description": description,
         },
     )

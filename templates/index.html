@@ -66,6 +66,10 @@
         <h3>Matching Resume</h3>
         <pre>{{ evaluation.matching_resume }}</pre>
         {% endif %}
+        {% if evaluation.auto_apply_note %}
+        <h3>Auto-Apply Status</h3>
+        <pre>{{ evaluation.auto_apply_note }}</pre>
+        {% endif %}
       </section>
       {% endif %}
 

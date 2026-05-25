@@ -416,7 +416,7 @@ def save_jobs(jobs):
 # AUTO APPLY PLACEHOLDER
 # ============================================================
 
-def auto_easy_apply(job_link):
+def auto_easy_apply(job_link, title=None, company=None):
 
     """
     Extend:
@@ -431,9 +431,10 @@ def auto_easy_apply(job_link):
     Use carefully.
     """
 
+    job_label = f"{title} at {company}" if title and company else job_link
     return (
-        "Auto-apply is not fully implemented in this demo. "
-        "This placeholder can be extended to open the job page and fill required fields."
+        f"Auto-apply placeholder for {job_label}. "
+        "This demo can be extended to open the job page, fill required fields, and submit the application."
     )
 
 # ============================================================
