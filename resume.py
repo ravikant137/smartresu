@@ -68,9 +68,9 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or os.getenv("VERCEL_OPENAI_KEY")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-client = OpenAI(
-    api_key=OPENAI_API_KEY
-)
+client = None
+if OPENAI_API_KEY:
+    client = OpenAI(api_key=OPENAI_API_KEY)
 
 # ============================================================
 # USER PROFILE
@@ -165,6 +165,9 @@ def analyze_job_ai(job_text, profile=None):
 
     """
 
+    if client is None:
+        return "OpenAI API key not configured. Set OPENAI_API_KEY or VERCEL_OPENAI_KEY in Vercel environment variables."
+
     response = client.chat.completions.create(
 
         model="gpt-4.1-mini",
@@ -203,6 +206,9 @@ def generate_recruiter_message(job, profile=None):
 
     """
 
+    if client is None:
+        return "OpenAI API key not configured. Set OPENAI_API_KEY or VERCEL_OPENAI_KEY in Vercel environment variables."
+
     response = client.chat.completions.create(
 
         model="gpt-4.1-mini",
@@ -237,6 +243,9 @@ def generate_cover_letter(job_description, profile=None):
     {job_description}
 
     """
+
+    if client is None:
+        return "OpenAI API key not configured. Set OPENAI_API_KEY or VERCEL_OPENAI_KEY in Vercel environment variables."
 
     response = client.chat.completions.create(
 
