@@ -262,6 +262,61 @@ def generate_cover_letter(job_description, profile=None):
 
     return response.choices[0].message.content
 
+
+# ============================================================
+# AI MATCHING RESUME
+# ============================================================
+
+def generate_matching_resume(job_description, resume_text=None, profile=None):
+
+    profile = profile or USER_PROFILE
+    resume_text = resume_text or ""
+    prompt = f"""
+
+    Rewrite the following resume content to better match this job description.
+    Keep the resume concise, ATS-friendly, and emphasize the skills below.
+
+    USER PROFILE:
+    Name: {profile['name']}
+    Experience: {profile['experience']} years
+    Skills: {', '.join(profile['skills'])}
+
+    CURRENT RESUME:
+    {resume_text}
+
+    JOB DESCRIPTION:
+    {job_description}
+
+    Return only the updated resume text.
+    """
+
+    if client is None:
+        matching_skills = [
+            skill for skill in profile['skills']
+            if skill.lower() in job_description.lower()
+        ]
+        return (
+            "OpenAI API key not configured. Generated fallback resume guidance:\n"
+            f"Focus on the following matching skills: {', '.join(matching_skills) or 'none detected'}\n"
+            "Add bullet points that highlight your Snowflake, ETL, dbt, and cloud data engineering experience."
+        )
+
+    response = client.chat.completions.create(
+
+        model="gpt-4.1-mini",
+
+        messages=[
+
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+    return response.choices[0].message.content
+
+
 # ============================================================
 # ATS SCORE
 # ============================================================
@@ -327,7 +382,8 @@ def scrape_linkedin_jobs(search_keywords=None):
             "location": "Remote",
             "posted": "2 days ago",
             "link": "https://example.com/jobs/snowflake-data-engineer",
-            "ats_score": calculate_ats("Snowflake Data Engineer remote"),
+            "description": "Snowflake Data Engineer role requiring Snowflake, ETL, dbt, Python, AWS, and remote work.",
+            "ats_score": calculate_ats("Snowflake Data Engineer role requiring Snowflake, ETL, dbt, Python, AWS, and remote work."),
             "visa": False,
             "ai_analysis": "Sample AI analysis available for demo.",
             "recruiter_message": "Hello, I am interested in this role and would love to discuss how my experience fits.",
@@ -339,7 +395,8 @@ def scrape_linkedin_jobs(search_keywords=None):
             "location": "Berlin, Germany",
             "posted": "1 week ago",
             "link": "https://example.com/jobs/cloud-data-engineer",
-            "ats_score": calculate_ats("Cloud Data Engineer Snowflake AWS"),
+            "description": "Cloud Data Engineer role with Snowflake, AWS, Python, ETL, and visa sponsorship possibility.",
+            "ats_score": calculate_ats("Cloud Data Engineer role with Snowflake, AWS, Python, ETL, and visa sponsorship possibility."),
             "visa": True,
             "ai_analysis": "Sample AI analysis available for demo.",
             "recruiter_message": "Hello, I bring solid cloud data engineering experience and would like to discuss this opportunity.",

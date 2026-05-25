@@ -13,6 +13,7 @@ from resume import (
     analyze_job_ai,
     generate_cover_letter,
     generate_recruiter_message,
+    generate_matching_resume,
     detect_visa,
     scrape_linkedin_jobs,
     auto_easy_apply,
@@ -192,6 +193,11 @@ async def search_jobs(
     search_keywords = [keyword] if keyword.strip() else None
     jobs = scrape_linkedin_jobs(search_keywords=search_keywords)
 
+    for job in jobs:
+        job_description = job.get("description") or f"{job['title']} {job['company']} {job['location']}"
+        job["ats_score"] = calculate_ats(job_description, profile)
+        job["needs_match"] = job["ats_score"] < 70
+
     return render_template(
         "index.html",
         {
@@ -214,15 +220,26 @@ async def apply_job(
     title: str = Form(""),
     company: str = Form(""),
     location: str = Form(""),
+    description: str = Form(""),
 ):
+    resume_text = compact_text(resume_text)
     profile = build_profile(resume_text)
-    job_text = f"{title}\n{company}\n{location}\n{job_link}"
+    job_text = description or f"{title} {company} {location} {job_link}"
     ats_score = calculate_ats(job_text, profile)
+    matching_resume = None
+    if ats_score < 70:
+        matching_resume = generate_matching_resume(job_text, resume_text, profile)
+
     result = auto_easy_apply(job_link)
     message = (
         result
         or f"Apply placeholder executed for {title} at {company}. ATS score: {ats_score}."
     )
+
+    evaluation = {
+        "ats_score": ats_score,
+        "matching_resume": matching_resume,
+    }
 
     return render_template(
         "index.html",
@@ -230,7 +247,7 @@ async def apply_job(
             "resume_text": resume_text,
             "profile": profile,
             "jobs": [],
-            "evaluation": None,
+            "evaluation": evaluation,
             "message": message,
             "keyword": "",
             "job_description": "",

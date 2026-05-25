@@ -47,13 +47,25 @@
       <section class="card">
         <h2>Evaluation Results</h2>
         <p><strong>ATS Score:</strong> {{ evaluation.ats_score }} / 100</p>
+        {% if evaluation.visa is defined %}
         <p><strong>Visa signal:</strong> {{ evaluation.visa }}</p>
+        {% endif %}
+        {% if evaluation.ai_analysis is defined %}
         <h3>AI Analysis</h3>
         <pre>{{ evaluation.ai_analysis }}</pre>
+        {% endif %}
+        {% if evaluation.cover_letter is defined %}
         <h3>Generated Cover Letter</h3>
         <pre>{{ evaluation.cover_letter }}</pre>
+        {% endif %}
+        {% if evaluation.recruiter_message is defined %}
         <h3>Recruiter Message</h3>
         <pre>{{ evaluation.recruiter_message }}</pre>
+        {% endif %}
+        {% if evaluation.matching_resume %}
+        <h3>Matching Resume</h3>
+        <pre>{{ evaluation.matching_resume }}</pre>
+        {% endif %}
       </section>
       {% endif %}
 
@@ -77,6 +89,7 @@
               <th>Company</th>
               <th>Location</th>
               <th>ATS</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -88,14 +101,27 @@
               <td>{{ job.location }}</td>
               <td>{{ job.ats_score }}</td>
               <td>
+                {% if job.needs_match %}
+                  <span class="badge badge-warning">Needs match</span>
+                {% else %}
+                  <span class="badge badge-success">Good match</span>
+                {% endif %}
+              </td>
+              <td>
                 <form action="/apply" method="post" class="inline-form">
                   <input type="hidden" name="resume_text" value="{{ resume_text | e }}" />
                   <input type="hidden" name="job_link" value="{{ job.link }}" />
                   <input type="hidden" name="title" value="{{ job.title }}" />
                   <input type="hidden" name="company" value="{{ job.company }}" />
                   <input type="hidden" name="location" value="{{ job.location }}" />
+                  <input type="hidden" name="description" value="{{ job.description | e }}" />
                   <button type="submit">Apply / Create Match</button>
                 </form>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="6">
+                <strong>Job description:</strong> {{ job.description or 'No description available.' }}
               </td>
             </tr>
             {% endfor %}
