@@ -1,0 +1,17 @@
+.vercel
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.env
+venv/
+.env.*
+
+# VS Code
+.vscode/
+
+# OS Files
+.DS_Store

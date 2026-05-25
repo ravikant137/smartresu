@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Resume ATS UI</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Smart Resume ATS Assistant</h1>
+        <p>Upload your resume, compare against job descriptions, and generate ATS match results.</p>
+      </header>
+
+      {% if message %}
+      <div class="alert">{{ message }}</div>
+      {% endif %}
+
+      <section class="card">
+        <h2>1. Upload Resume</h2>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+          <input type="file" name="resume_file" accept=".txt,.pdf,.docx" required />
+          <button type="submit">Upload Resume</button>
+        </form>
+      </section>
+
+      {% if profile %}
+      <section class="card">
+        <h2>Resume Profile</h2>
+        <p><strong>Experience:</strong> {{ profile.experience }} years</p>
+        <p><strong>Detected skills:</strong> {{ profile.skills | join(", ") }}</p>
+      </section>
+      {% endif %}
+
+      <section class="card">
+        <h2>2. Evaluate Job Description</h2>
+        <form action="/evaluate" method="post">
+          <input type="hidden" name="resume_text" value="{{ resume_text | e }}" />
+          <label for="job_description">Paste a job description or JD snippet:</label>
+          <textarea id="job_description" name="job_description" rows="10" required>{{ job_description or "" }}</textarea>
+          <button type="submit">Compare and Generate Match</button>
+        </form>
+      </section>
+
+      {% if evaluation %}
+      <section class="card">
+        <h2>Evaluation Results</h2>
+        <p><strong>ATS Score:</strong> {{ evaluation.ats_score }} / 100</p>
+        <p><strong>Visa signal:</strong> {{ evaluation.visa }}</p>
+        <h3>AI Analysis</h3>
+        <pre>{{ evaluation.ai_analysis }}</pre>
+        <h3>Generated Cover Letter</h3>
+        <pre>{{ evaluation.cover_letter }}</pre>
+        <h3>Recruiter Message</h3>
+        <pre>{{ evaluation.recruiter_message }}</pre>
+      </section>
+      {% endif %}
+
+      <section class="card">
+        <h2>3. Search LinkedIn Jobs</h2>
+        <form action="/search" method="post">
+          <input type="hidden" name="resume_text" value="{{ resume_text | e }}" />
+          <label for="keyword">Keyword (optional):</label>
+          <input id="keyword" name="keyword" type="text" value="{{ keyword or "" }}" placeholder="Snowflake Data Engineer" />
+          <button type="submit">Search Jobs</button>
+        </form>
+      </section>
+
+      {% if jobs %}
+      <section class="card">
+        <h2>Matched Jobs</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Job</th>
+              <th>Company</th>
+              <th>Location</th>
+              <th>ATS</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for job in jobs %}
+            <tr>
+              <td>{{ job.title }}</td>
+              <td>{{ job.company }}</td>
+              <td>{{ job.location }}</td>
+              <td>{{ job.ats_score }}</td>
+              <td>
+                <form action="/apply" method="post" class="inline-form">
+                  <input type="hidden" name="resume_text" value="{{ resume_text | e }}" />
+                  <input type="hidden" name="job_link" value="{{ job.link }}" />
+                  <input type="hidden" name="title" value="{{ job.title }}" />
+                  <input type="hidden" name="company" value="{{ job.company }}" />
+                  <input type="hidden" name="location" value="{{ job.location }}" />
+                  <button type="submit">Apply / Create Match</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+      {% endif %}
+    </div>
+  </body>
+</html>
