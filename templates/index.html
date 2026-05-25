@@ -102,7 +102,7 @@
               <td>{{ job.ats_score }}</td>
               <td>
                 {% if job.needs_match %}
-                  <span class="badge badge-warning">Needs match</span>
+                  <span class="badge badge-warning">Match first, then apply</span>
                 {% else %}
                   <span class="badge badge-success">Good match</span>
                 {% endif %}
@@ -116,6 +116,15 @@
                   <input type="hidden" name="location" value="{{ job.location }}" />
                   <input type="hidden" name="description" value="{{ job.description | e }}" />
                   <button type="submit">Apply / Create Match</button>
+                </form>
+                <form action="/generate-match" method="post" class="inline-form" style="margin-top: 8px; display:block;">
+                  <input type="hidden" name="resume_text" value="{{ resume_text | e }}" />
+                  <input type="hidden" name="job_link" value="{{ job.link }}" />
+                  <input type="hidden" name="title" value="{{ job.title }}" />
+                  <input type="hidden" name="company" value="{{ job.company }}" />
+                  <input type="hidden" name="location" value="{{ job.location }}" />
+                  <input type="hidden" name="description" value="{{ job.description | e }}" />
+                  <button type="submit">Generate Match</button>
                 </form>
               </td>
             </tr>

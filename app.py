@@ -212,6 +212,52 @@ async def search_jobs(
     )
 
 
+@app.post("/generate-match")
+async def generate_match(
+    request: Request,
+    resume_text: str = Form(""),
+    job_link: str = Form(""),
+    title: str = Form(""),
+    company: str = Form(""),
+    location: str = Form(""),
+    description: str = Form(""),
+):
+    resume_text = compact_text(resume_text)
+    if not resume_text:
+        return RedirectResponse(url="/", status_code=303)
+
+    profile = build_profile(resume_text)
+    job_text = description or f"{title} {company} {location} {job_link}"
+    ats_score = calculate_ats(job_text, profile)
+    matching_resume = generate_matching_resume(job_text, resume_text, profile)
+
+    job = {
+        "title": title,
+        "company": company,
+        "location": location,
+        "link": job_link,
+        "description": description,
+        "ats_score": ats_score,
+        "needs_match": ats_score < 70,
+    }
+
+    return render_template(
+        "index.html",
+        {
+            "resume_text": resume_text,
+            "profile": profile,
+            "jobs": [job],
+            "evaluation": {
+                "ats_score": ats_score,
+                "matching_resume": matching_resume,
+            },
+            "message": f"Generated matching resume for {title} at {company}.",
+            "keyword": "",
+            "job_description": description,
+        },
+    )
+
+
 @app.post("/apply")
 async def apply_job(
     request: Request,
