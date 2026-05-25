@@ -3,9 +3,9 @@ import re
 from typing import List, Optional
 
 from fastapi import FastAPI, File, Form, UploadFile, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from resume import (
     USER_PROFILE,
@@ -20,7 +20,14 @@ from resume import (
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+
+templates = Environment(
+    loader=FileSystemLoader("templates"),
+    autoescape=select_autoescape(["html", "xml"]),
+)
+
+def render_template(template_name: str, context: dict) -> HTMLResponse:
+    return HTMLResponse(templates.get_template(template_name).render(**context))
 
 SKILL_CANDIDATES = [
     "snowflake",
@@ -101,15 +108,16 @@ def compact_text(text: Optional[str]) -> str:
 
 @app.get("/")
 async def home(request: Request):
-    return templates.TemplateResponse(
+    return render_template(
         "index.html",
         {
-            "request": request,
             "resume_text": "",
             "profile": None,
             "jobs": [],
             "evaluation": None,
             "message": None,
+            "job_description": "",
+            "keyword": "",
         },
     )
 
@@ -120,15 +128,16 @@ async def upload_resume(request: Request, resume_file: UploadFile = File(...)):
     resume_text = extract_text_from_resume(content, resume_file.filename)
     profile = build_profile(resume_text)
 
-    return templates.TemplateResponse(
+    return render_template(
         "index.html",
         {
-            "request": request,
             "resume_text": resume_text,
             "profile": profile,
             "jobs": [],
             "evaluation": None,
             "message": "Resume uploaded and analyzed.",
+            "job_description": "",
+            "keyword": "",
         },
     )
 
@@ -158,16 +167,16 @@ async def evaluate_job(
         "recruiter_message": recruiter_message,
     }
 
-    return templates.TemplateResponse(
+    return render_template(
         "index.html",
         {
-            "request": request,
             "resume_text": resume_text,
             "profile": profile,
             "jobs": [],
             "evaluation": evaluation,
             "job_description": job_description,
             "message": "Job description evaluated successfully.",
+            "keyword": "",
         },
     )
 
@@ -183,16 +192,16 @@ async def search_jobs(
     search_keywords = [keyword] if keyword.strip() else None
     jobs = scrape_linkedin_jobs(search_keywords=search_keywords)
 
-    return templates.TemplateResponse(
+    return render_template(
         "index.html",
         {
-            "request": request,
             "resume_text": resume_text,
             "profile": profile,
             "jobs": jobs,
             "evaluation": None,
             "keyword": keyword,
             "message": f"Found {len(jobs)} jobs for '{keyword or 'default keywords'}'.",
+            "job_description": "",
         },
     )
 
@@ -215,14 +224,15 @@ async def apply_job(
         or f"Apply placeholder executed for {title} at {company}. ATS score: {ats_score}."
     )
 
-    return templates.TemplateResponse(
+    return render_template(
         "index.html",
         {
-            "request": request,
             "resume_text": resume_text,
             "profile": profile,
             "jobs": [],
             "evaluation": None,
             "message": message,
+            "keyword": "",
+            "job_description": "",
         },
     )
